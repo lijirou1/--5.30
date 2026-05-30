@@ -11,67 +11,6 @@ float Angle1 = 30.0f;			//定义舵机1的角度变量（30~270）
 float Speed2 = 0;				//定义舵机2的转速变量（-100~100）
 
 /**
-  * 函    数：云台一键自检
-  * 参    数：无
-  * 返 回 值：无
-  * 说    明：双舵机同时运动，模拟云台自检
-  *           相位1：竖直上扫（30°→270°）+ 水平正转，同时进行
-  *           相位2：竖直下扫（270°→30°）+ 水平反转，同时进行
-  *           相位3：竖直回中150° + 水平停止
-  */
-void Gimbal_SelfTest(void)
-{
-	uint8_t i;
-
-	/* 显示自检提示 */
-	OLED_Clear();
-	OLED_ShowString(2, 1, "Self-Test...");
-
-	/* 先回到起始位置 */
-	Servo1_SetAngle(150);
-	Servo2_SetSpeed(0);
-	Delay_ms(500);
-
-	/* === 相位1：竖直上扫 + 水平正转（同时进行）=== */
-	Servo2_SetSpeed(50);					//水平开始正转
-	for (i = 3; i <= 27; i++)				//30°→270°，每次10°，间隔100ms
-	{
-		Servo1_SetAngle(i * 10);
-		OLED_ShowNum(1, 1, i * 10, 3);
-		OLED_ShowString(2, 1, "S2: FWD   ");
-		Delay_ms(100);
-	}
-
-	/* === 相位2：竖直下扫 + 水平反转（同时进行）=== */
-	Servo2_SetSpeed(-50);					//水平开始反转
-	for (i = 27; i >= 3; i--)				//270°→30°，每次10°
-	{
-		Servo1_SetAngle(i * 10);
-		OLED_ShowNum(1, 1, i * 10, 3);
-		OLED_ShowString(2, 1, "S2: REV   ");
-		Delay_ms(100);
-	}
-
-	/* === 相位3：竖直回中 + 水平停止 === */
-	Servo2_SetSpeed(0);						//水平停止
-	OLED_ShowString(2, 1, "S2: STOP  ");
-	Servo1_SetAngle(150);					//竖直回中150°
-	Delay_ms(500);
-	Angle1 = 150;
-	Speed2 = 0;
-
-	/* 自检完成 */
-	OLED_Clear();
-	OLED_ShowString(2, 1, "Self-Test OK!");
-	Delay_ms(800);
-	OLED_Clear();
-	OLED_ShowString(1, 1, "S1:");
-	OLED_ShowString(2, 1, "S2:");
-	OLED_ShowNum(1, 4, (uint32_t)Angle1, 3);
-	OLED_ShowSignedNum(2, 4, (int16_t)Speed2, 3);
-}
-
-/**
   * 函    数：陀螺仪实时追踪云台
   * 参    数：无
   * 返 回 值：无
@@ -352,7 +291,6 @@ int main(void)
 		}
 		if (KeyNum == 3)				//按键3按下，原有的云台一键自检
 		{
-			Gimbal_SelfTest();
 		}
 
 		/* 使用 TIM3 20ms 控制节拍——OLED第3行心跳指示 */
